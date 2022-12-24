@@ -1,0 +1,12 @@
+site:
+  entry-points:
+    - source: index.html
+      pipeline:
+        - layout: layouts/base
+        - target: dist/index.html
+    - source: 'posts/{post-name}.md'
+      pipeline:
+        - plugin: markdown
+        - layout: layouts/base
+        - layout: layouts/post.html
+        - target: 'dist/posts/{post-name}/index.html'
