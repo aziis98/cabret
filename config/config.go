@@ -8,34 +8,38 @@ import (
 
 // Operation is an enum of various operations
 type Operation struct {
-	Layout string `yaml:"layout,omitempty"`
-	Target string `yaml:"target,omitempty"`
-	Plugin string `yaml:"plugin,omitempty"`
+	Layout string `yaml:",omitempty"`
+	Target string `yaml:",omitempty"`
+	Plugin string `yaml:",omitempty"`
+
+	Options map[string]any `yaml:",omitempty"`
 }
 
 type EntryPoint struct {
-	Source   string      `yaml:"source"`
-	Pipeline []Operation `yaml:"pipeline"`
+	Source   string      `yaml:",omitempty"`
+	Pipeline []Operation `yaml:",omitempty"`
 }
 
-type Config struct {
-	Output string `yaml:"output,omitempty"`
+type Options struct {
+	Excludes []string `yaml:",omitempty"`
+	// Include []string `yaml:",omitempty"`
+	Output string `yaml:",omitempty"`
 }
 
-// Site has some configuration for the
-type Site struct {
-	Config      Config       `yaml:"config,omitempty"`
-	EntryPoints []EntryPoint `yaml:"entry-points"`
+// Cabretfile has some configuration for the
+type Cabretfile struct {
+	Options     Options       `yaml:",omitempty"`
+	EntryPoints []*EntryPoint `yaml:"entryPoints"`
 }
 
-func ParseCabretfile(file string) (*Site, error) {
+func ReadCabretfile(file string) (*Cabretfile, error) {
 	f, err := os.Open(file)
 	if err != nil {
 		return nil, err
 	}
 
-	site := new(Site)
-	if err := yaml.NewDecoder(f).Decode(&site); err != nil {
+	site := new(Cabretfile)
+	if err := yaml.NewDecoder(f).Decode(site); err != nil {
 		return nil, err
 	}
 

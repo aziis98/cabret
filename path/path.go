@@ -9,20 +9,34 @@ import (
 	"github.com/alecthomas/participle/v2/lexer"
 )
 
+// FullMatch represents the complete match in a match result context map
+const FullMatch = "*"
+
 type PathPart interface {
 	regex() string
 }
 
-type PathSlash struct {
-	Value string `"/"`
+type PathLiteral struct {
+	LongAny  bool `parser:"  @'**'"`
+	ShortAny bool `parser:"| @'*' "`
+	Slash    bool `parser:"| @'/' "`
 }
 
-func (p PathSlash) regex() string {
-	return "/"
+func (p PathLiteral) regex() string {
+	switch {
+	case p.Slash:
+		return "/"
+	case p.ShortAny:
+		return "([^/]+?)"
+	case p.LongAny:
+		return "(.+?)"
+	default:
+		panic("illegal enum state")
+	}
 }
 
 type PathShortPattern struct {
-	Name string `"{" @Ident "}"`
+	Name string `parser:"'{' @Ident '}'"`
 }
 
 func (p PathShortPattern) regex() string {
@@ -30,7 +44,7 @@ func (p PathShortPattern) regex() string {
 }
 
 type PathLongPattern struct {
-	Name string `"{{" @Ident "}}"`
+	Name string `parser:"'{{' @Ident '}}'"`
 }
 
 func (p PathLongPattern) regex() string {
@@ -38,18 +52,18 @@ func (p PathLongPattern) regex() string {
 }
 
 type PathString struct {
-	Value string `@Ident`
+	Value string `parser:"@Ident"`
 }
 
 func (p PathString) regex() string {
 	return regexp.QuoteMeta(p.Value)
 }
 
-type PathPattern struct {
-	Parts []PathPart `@@+`
+type Pattern struct {
+	Parts []PathPart `parser:"@@+"`
 }
 
-func (pp PathPattern) regex() string {
+func (pp Pattern) regex() string {
 	sb := &strings.Builder{}
 
 	for _, p := range pp.Parts {
@@ -59,7 +73,7 @@ func (pp PathPattern) regex() string {
 	return sb.String()
 }
 
-func (pp PathPattern) Match(s string) (bool, map[string]string, error) {
+func (pp Pattern) Match(s string) (bool, map[string]string, error) {
 	r, err := regexp.Compile("^" + pp.regex() + "$")
 	if err != nil {
 		return false, nil, err
@@ -72,15 +86,19 @@ func (pp PathPattern) Match(s string) (bool, map[string]string, error) {
 
 	ctx := map[string]string{}
 	for i, name := range r.SubexpNames() {
-		ctx[name] = ms[i]
+		if name != "" {
+			ctx[name] = ms[i]
+		}
 	}
+
+	ctx[FullMatch] = ms[0]
 
 	return true, ctx, nil
 }
 
-var parser = participle.MustBuild[PathPattern](
+var parser = participle.MustBuild[Pattern](
 	participle.Union[PathPart](
-		&PathSlash{},
+		&PathLiteral{},
 		&PathLongPattern{},
 		&PathShortPattern{},
 		&PathString{},
@@ -88,6 +106,8 @@ var parser = participle.MustBuild[PathPattern](
 	participle.Lexer(
 		lexer.MustSimple([]lexer.SimpleRule{
 			{Name: "Slash", Pattern: `/`},
+			{Name: "LongAny", Pattern: `\*\*`},
+			{Name: "ShortAny", Pattern: `\*`},
 			{Name: "PatternLongOpen", Pattern: `{{`},
 			{Name: "PatternLongClose", Pattern: `}}`},
 			{Name: "PatternShortOpen", Pattern: `{`},
@@ -97,11 +117,19 @@ var parser = participle.MustBuild[PathPattern](
 	),
 )
 
-func ParsePattern(path string) (*PathPattern, error) {
+func RenderTemplate(tmpl string, ctx map[string]string) string {
+	s := tmpl
+	for k, v := range ctx {
+		s = strings.ReplaceAll(s, "{"+k+"}", v)
+	}
+	return s
+}
+
+func ParsePattern(path string) (*Pattern, error) {
 	return parser.ParseString("", path)
 }
 
-func MustParsePattern(path string) *PathPattern {
+func MustParsePattern(path string) *Pattern {
 	p, err := ParsePattern(path)
 	if err != nil {
 		panic(err)
