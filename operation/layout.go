@@ -17,7 +17,7 @@ import (
 
 var HtmlMimeType = mime.TypeByExtension(".html")
 
-var _ cabret.Operation = Layout{}
+var _ cabret.FlatMapOperation = Layout{}
 
 type Layout struct {
 	// TemplateFilesPattern is a comma separated list of unix glob patterns
@@ -26,7 +26,7 @@ type Layout struct {
 	Options map[string]any
 }
 
-func (op Layout) Process(content cabret.Content) (*cabret.Content, error) {
+func (op Layout) FlatMap(content cabret.Content) (*cabret.Content, error) {
 	var tmpl layout.Template
 
 	patterns := strings.Split(op.TemplateFilesPattern, ",")

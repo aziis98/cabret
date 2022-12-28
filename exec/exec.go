@@ -19,24 +19,33 @@ type matchResult struct {
 }
 
 func BuildOperation(op config.Operation) cabret.Operation {
-	switch {
-	case op.Layout != "":
-		path := op.Layout
-		return &operation.Layout{
-			TemplateFilesPattern: path,
-			Options:              op.Options,
+	if path, ok := op["read"]; ok {
+		return cabret.FlatMapToMapAll{&operation.Target{
+			PathTemplate: path.(string),
+		}}
+	}
+	if path, ok := op["write"]; ok {
+		return cabret.FlatMapToMapAll{&operation.Target{
+			PathTemplate: path.(string),
+		}}
+	}
+	if name, ok := op["plugin"]; ok {
+		switch name {
+		case "layout":
+			path := op["path"].(string)
+			delete(op, "path")
+
+			return cabret.FlatMapToMapAll{&operation.Layout{
+				TemplateFilesPattern: path,
+				Options:              op,
+			}}
+		case "markdown":
+			return cabret.FlatMapToMapAll{&operation.Markdown{
+				Options: op,
+			}}
+		default:
+			log.Fatalf(`invalid operation: %s`, name)
 		}
-	case op.Target != "":
-		path := op.Target
-		return &operation.Target{
-			PathTemplate: path,
-		}
-	case op.Plugin == "markdown":
-		return &operation.Markdown{
-			Options: op.Options,
-		}
-	default:
-		log.Fatalf(`invalid operation: %s`, op.Plugin)
 	}
 
 	return nil

@@ -11,11 +11,13 @@ import (
 	"github.com/yuin/goldmark/parser"
 )
 
+var _ cabret.FlatMapOperation = Markdown{}
+
 type Markdown struct {
 	Options map[string]any
 }
 
-func (op Markdown) Process(content cabret.Content) (*cabret.Content, error) {
+func (op Markdown) FlatMap(content cabret.Content) (*cabret.Content, error) {
 	md := goldmark.New(
 		goldmark.WithExtensions(
 			extension.GFM,

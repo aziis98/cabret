@@ -7,13 +7,7 @@ import (
 )
 
 // Operation is an enum of various operations
-type Operation struct {
-	Layout string `yaml:",omitempty"`
-	Target string `yaml:",omitempty"`
-	Plugin string `yaml:",omitempty"`
-
-	Options map[string]any `yaml:",omitempty"`
-}
+type Operation map[string]any
 
 type EntryPoint struct {
 	Source   string      `yaml:",omitempty"`

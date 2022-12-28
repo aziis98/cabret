@@ -10,13 +10,13 @@ import (
 	"github.com/aziis98/cabret/path"
 )
 
-var _ cabret.Operation = Target{}
+var _ cabret.FlatMapOperation = Target{}
 
 type Target struct {
 	PathTemplate string
 }
 
-func (op Target) Process(c cabret.Content) (*cabret.Content, error) {
+func (op Target) FlatMap(c cabret.Content) (*cabret.Content, error) {
 	mr, ok := c.Metadata[cabret.MatchResult].(map[string]string)
 	if !ok {
 		return nil, fmt.Errorf(`invalid match result type %T`, c.Metadata[cabret.MatchResult])

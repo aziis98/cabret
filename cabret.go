@@ -20,6 +20,32 @@ type Content struct {
 	Metadata Map
 }
 
-type Operation interface {
-	Process(content Content) (*Content, error)
+type ListOperation interface {
+	MapAll(contents []Content) ([]Content, error)
+}
+
+type ItemOperation interface {
+	FlatMap(content Content) (*Content, error)
+}
+
+type FlatMapToMapAll struct{ FlatMapOperation }
+
+func (op FlatMapToMapAll) MapAll(contents []Content) ([]Content, error) {
+	mapped := []Content{}
+
+	for _, item := range contents {
+		result, err := op.FlatMap(item)
+		if err != nil {
+			return nil, err
+		}
+
+		// skip terminal operations
+		if result == nil {
+			continue
+		}
+
+		mapped = append(mapped, *result)
+	}
+
+	return mapped, nil
 }
