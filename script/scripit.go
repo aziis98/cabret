@@ -71,6 +71,11 @@ type Quote struct {
 	Value Quotation `parser:"'#' @@"`
 }
 
+type PropertyAccess struct {
+	Receiver IdentifierOrParenthesis   `parser:"@@"`
+	Accesses []IdentifierOrParenthesis `parser:"('.' @@)*"`
+}
+
 type Quotation interface{}
 
 type ExpressionFactor interface{}
@@ -80,6 +85,8 @@ type BinaryOperation struct {
 	Operator string           `parser:"( @Operator"`
 	Rhs      Expression       `parser:"  @@ )?"`
 }
+
+type IdentifierOrParenthesis interface{}
 
 var (
 	scriptLexer = lexer.MustSimple([]lexer.SimpleRule{
@@ -125,6 +132,10 @@ var (
 			&ParenthesizedExpression{},
 		),
 		participle.Union[FunctionReceiver](
+			&Identifier{},
+			&ParenthesizedExpression{},
+		),
+		participle.Union[IdentifierOrParenthesis](
 			&Identifier{},
 			&ParenthesizedExpression{},
 		),

@@ -32,10 +32,6 @@ Mini scripting language for querying the website "model".
 true
 false
 
--- shorter form
-#t
-#f
-
 -- Lists
 [1 2 3]
 
