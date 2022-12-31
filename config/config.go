@@ -6,24 +6,21 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-// Operation is an enum of various operations
+// Operation should have at least one key in "source", "use", "target". The remaining keys are options for that operation
 type Operation map[string]any
 
-type EntryPoint struct {
-	Source   string      `yaml:",omitempty"`
-	Pipeline []Operation `yaml:",omitempty"`
+type Pipeline struct {
+	Pipeline []Operation `yaml:"pipeline"`
 }
 
-type Options struct {
+type BuildOptions struct {
+	// Excludes lists files and folders to globally exclude from compilation
 	Excludes []string `yaml:",omitempty"`
-	// Include []string `yaml:",omitempty"`
-	Output string `yaml:",omitempty"`
 }
 
-// Cabretfile has some configuration for the
 type Cabretfile struct {
-	Options     Options       `yaml:",omitempty"`
-	EntryPoints []*EntryPoint `yaml:"entryPoints"`
+	Options BuildOptions
+	Build   []Pipeline
 }
 
 func ReadCabretfile(file string) (*Cabretfile, error) {

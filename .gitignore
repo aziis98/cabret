@@ -1,4 +1,7 @@
 
+.env
 *.local*
 bin/
 dist/
+
+.vscode/

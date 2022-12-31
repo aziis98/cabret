@@ -2,6 +2,7 @@ package operation
 
 import (
 	"bytes"
+	"log"
 
 	"github.com/aziis98/cabret"
 	"github.com/iancoleman/strcase"
@@ -11,13 +12,19 @@ import (
 	"github.com/yuin/goldmark/parser"
 )
 
-var _ cabret.FlatMapOperation = Markdown{}
+func init() {
+	registerType("markdown", &Markdown{})
+}
 
 type Markdown struct {
 	Options map[string]any
 }
 
-func (op Markdown) FlatMap(content cabret.Content) (*cabret.Content, error) {
+func (op *Markdown) Load(config map[string]any) error {
+	return nil
+}
+
+func (op Markdown) ProcessItem(content cabret.Content) (*cabret.Content, error) {
 	md := goldmark.New(
 		goldmark.WithExtensions(
 			extension.GFM,
@@ -29,6 +36,8 @@ func (op Markdown) FlatMap(content cabret.Content) (*cabret.Content, error) {
 	)
 
 	var buf bytes.Buffer
+
+	log.Printf(`[operation.Markdown] rendering markdown`)
 
 	context := parser.NewContext()
 	if err := md.Convert(content.Data, &buf, parser.WithContext(context)); err != nil {

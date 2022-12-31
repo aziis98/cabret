@@ -2,6 +2,7 @@ package operation
 
 import (
 	"fmt"
+	"log"
 	"os"
 
 	gopath "path"
@@ -10,19 +11,37 @@ import (
 	"github.com/aziis98/cabret/path"
 )
 
-var _ cabret.FlatMapOperation = Target{}
+func init() {
+	registerType("target", &Target{})
+}
 
 type Target struct {
 	PathTemplate string
 }
 
-func (op Target) FlatMap(c cabret.Content) (*cabret.Content, error) {
-	mr, ok := c.Metadata[cabret.MatchResult].(map[string]string)
+func (op *Target) Load(config map[string]any) error {
+	if v, ok := config[ShortFormValueKey]; ok {
+		template, ok := v.(string)
+		if !ok {
+			return fmt.Errorf(`expected pattern but got "%v" of type %T`, v, v)
+		}
+
+		op.PathTemplate = template
+		return nil
+	}
+
+	return fmt.Errorf(`invalid config for "target": %#v`, config)
+}
+
+func (op Target) ProcessItem(c cabret.Content) (*cabret.Content, error) {
+	mr, ok := c.Metadata[cabret.MatchResultKey].(map[string]string)
 	if !ok {
-		return nil, fmt.Errorf(`invalid match result type %T`, c.Metadata[cabret.MatchResult])
+		return nil, fmt.Errorf(`invalid match result type %T`, c.Metadata[cabret.MatchResultKey])
 	}
 
 	target := path.RenderTemplate(op.PathTemplate, mr)
+
+	log.Printf(`[operation.Target] writing "%s"`, target)
 
 	if err := os.MkdirAll(gopath.Dir(target), 0777); err != nil {
 		return nil, err

@@ -1,18 +1,18 @@
-package layout
+package template
 
 import (
 	"bytes"
-	"text/template"
+	goTextTemplate "text/template"
 )
 
 var _ Template = TextTemplate{}
 
 type TextTemplate struct {
-	*template.Template
+	*goTextTemplate.Template
 }
 
 func NewTextTemplate(files ...string) (*TextTemplate, error) {
-	t, err := template.ParseFiles(files...)
+	t, err := goTextTemplate.ParseFiles(files...)
 	if err != nil {
 		return nil, err
 	}
@@ -21,11 +21,10 @@ func NewTextTemplate(files ...string) (*TextTemplate, error) {
 }
 
 func (t TextTemplate) Render(ctx map[string]any) ([]byte, error) {
-	var b bytes.Buffer
-
-	if err := t.Template.Execute(&b, ctx); err != nil {
+	var buf bytes.Buffer
+	if err := t.Template.Execute(&buf, ctx); err != nil {
 		return nil, err
 	}
 
-	return b.Bytes(), nil
+	return buf.Bytes(), nil
 }

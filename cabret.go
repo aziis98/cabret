@@ -1,6 +1,20 @@
 package cabret
 
-const MatchResult = "MatchResult"
+import (
+	"fmt"
+	"log"
+)
+
+func init() {
+	log.SetFlags(0)
+}
+
+const MatchResultKey = "MatchResult"
+
+type MatchResult struct {
+	File     string
+	Captures map[string]string
+}
 
 type Map map[string]any
 
@@ -20,32 +34,41 @@ type Content struct {
 	Metadata Map
 }
 
+type Operation interface {
+	Load(config map[string]any) error
+}
+
 type ListOperation interface {
-	MapAll(contents []Content) ([]Content, error)
+	Operation
+	ProcessList(contents []Content) ([]Content, error)
 }
 
 type ItemOperation interface {
-	FlatMap(content Content) (*Content, error)
+	Operation
+	ProcessItem(content Content) (*Content, error)
 }
 
-type FlatMapToMapAll struct{ FlatMapOperation }
+func ProcessOperation(op Operation, inputs []Content) ([]Content, error) {
+	switch op := op.(type) {
+	case ListOperation:
+		return op.ProcessList(inputs)
 
-func (op FlatMapToMapAll) MapAll(contents []Content) ([]Content, error) {
-	mapped := []Content{}
+	case ItemOperation:
+		outputs := []Content{}
+		for _, item := range inputs {
+			result, err := op.ProcessItem(item)
+			if err != nil {
+				return nil, err
+			}
 
-	for _, item := range contents {
-		result, err := op.FlatMap(item)
-		if err != nil {
-			return nil, err
+			// skip terminal operations
+			if result == nil {
+				continue
+			}
+			outputs = append(outputs, *result)
 		}
-
-		// skip terminal operations
-		if result == nil {
-			continue
-		}
-
-		mapped = append(mapped, *result)
+		return outputs, nil
+	default:
+		return nil, fmt.Errorf(`invalid operation type %T`, op)
 	}
-
-	return mapped, nil
 }

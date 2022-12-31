@@ -1,12 +1,14 @@
-entryPoints:
-  - source: index.html
-    pipeline:
-      - layout: layouts/base.html
+build:
+  - pipeline:
+      - source: index.html
+      - use: layout
+        path: layouts/base.html
       - target: dist/index.html
-  - source: posts/{id}.md
-    pipeline:
-      - plugin: markdown
-      - layout: layouts/base.html
+  - pipeline:
+      - source: posts/{id}.md
+      - use: markdown
+      - use: layout
+        path: layouts/base.html
       - target: dist/posts/{id}/index.html
 
 

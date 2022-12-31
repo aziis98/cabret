@@ -9,17 +9,15 @@ import (
 
 func main() {
 	log.SetFlags(0)
-	log.Printf("Rendering current project")
 
-	site, err := config.ReadCabretfile("./Cabretfile.yaml")
+	cabretfile, err := config.ReadCabretfile("./Cabretfile.yaml")
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	// repr.Println(site)
+	// repr.Println(cabretfile)
 
-	if err := exec.Execute(site); err != nil {
+	if err := exec.Execute(cabretfile); err != nil {
 		log.Fatal(err)
 	}
-
 }

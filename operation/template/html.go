@@ -1,18 +1,18 @@
-package layout
+package template
 
 import (
 	"bytes"
-	"html/template"
+	goHtmlTemplate "html/template"
 )
 
 var _ Template = HtmlTemplate{}
 
 type HtmlTemplate struct {
-	*template.Template
+	*goHtmlTemplate.Template
 }
 
 func NewHtmlTemplate(files ...string) (*HtmlTemplate, error) {
-	t, err := template.ParseFiles(files...)
+	t, err := goHtmlTemplate.ParseFiles(files...)
 	if err != nil {
 		return nil, err
 	}
@@ -21,11 +21,10 @@ func NewHtmlTemplate(files ...string) (*HtmlTemplate, error) {
 }
 
 func (t HtmlTemplate) Render(ctx map[string]any) ([]byte, error) {
-	var b bytes.Buffer
-
-	if err := t.Template.Execute(&b, ctx); err != nil {
+	var buf bytes.Buffer
+	if err := t.Template.Execute(&buf, ctx); err != nil {
 		return nil, err
 	}
 
-	return b.Bytes(), nil
+	return buf.Bytes(), nil
 }
