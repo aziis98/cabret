@@ -1,6 +1,6 @@
 # Cabret
 
-A yaml based static site generator, ideally with the same features as Hugo but with a simpler model. Here is a basic example of a _Cabretfile.yaml_
+Cabret is a yaml based static site generator, ideally with the same features as Hugo but with a simpler model. Here is a simple example of a _Cabretfile.yaml_
 
 ```yaml
 build:
@@ -17,7 +17,7 @@ build:
       - target: dist/posts/{{ .Id }}/index.html
 ```
 
-Cabret is based on the idea of a data pipeline. Along a pipeline flows **a list** of `Content` objects that are just
+Cabret is based on the idea of a data pipeline. Along a pipeline flows **a list** of `Content` items that are just items with a data, mime type and metadata.
 
 ```go
 type Content struct {
@@ -27,13 +27,22 @@ type Content struct {
 }
 ```
 
-The `Type` is the _mime type_ of the `Data`. The `Metadata` can be whatever the user wants and operations and populate it with special fields as they please. In some cases its useful to have `Data` be `nil`, when that happens the `Type` should be `cabret.MetadataOnly` (just the string `metadata-only`)
+The `Type` is the _mime type_ of the `Data`. The `Metadata` can be whatever the user wants and operations can populate it with special fields as they please. In some cases its useful to have `Data` be `nil`, when that happens the `Type` should be `cabret.MetadataOnly` (just the string `"metadata-only"`)
 
 ## Operations
 
-Each pipeline is a list of operations, the first field in an operation must be one of `source`, `use` or `target`.
+Each pipeline is a list of operations, the first field in an operation should be one of `source`, `use` or `target`.
 
-- `source: <pattern>`
+- `source: <path pattern>`
+
+    A **path pattern** is a "glob pattern" with captures, some examples are
+
+    ```
+    posts/{id}.md 
+    {{folders}}/{year}-{month}-{day}.json
+    ``` 
+
+    the only difference is that `{{...}}` captures can match slashes so can be used to match more than one "path part", while `{...}` can only match non slash characters.
 
     Load files matching the given pattern and populates the field `.Metadata.MatchResult` with the captures.
 
@@ -52,9 +61,13 @@ Each pipeline is a list of operations, the first field in an operation must be o
       - <path patternN>
     ```
 
-- `target: <template>`
+- `target: <path template>`
+
+    A **path template** can contains `{...}` interpolations, the key inside the braces will be replaced using the `.Metadata.MatchResult` map. Double braces can also be used and are evaluated using Go `text/template` with context the whole item metadata.
 
     For each incoming item this will render the given path template with the item metadata and write the content to disk.
+
+
 
 - `use: <operation>`
 
