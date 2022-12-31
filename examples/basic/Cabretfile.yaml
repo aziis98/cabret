@@ -10,5 +10,14 @@ build:
       - use: layout
         path: layouts/base.html
       - target: dist/posts/{id}/index.html
-
+  - pipeline:
+      - source: posts/{id}.md
+      - use: frontmatter
+      - use: categorize
+        key: tags
+      - use: layout
+        path: layouts/tag.html
+      - use: layout
+        path: layouts/base.html
+      - target: dist/tags/{{ .Category }}/index.html
 

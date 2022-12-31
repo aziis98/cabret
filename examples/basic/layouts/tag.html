@@ -1,0 +1,12 @@
+<h1>Tag #{{ .Category }}</h1>
+
+<p>Here are the posts with this tag</p>
+
+<ul>
+    {{ range .Items }}
+    <li>
+        <p>{{ .Metadata.Title }}</p>
+        <pre><code>{{ .Metadata.MatchResult }}</code></pre>
+    </li>
+    {{ end }}
+</ul>

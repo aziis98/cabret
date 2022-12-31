@@ -2,6 +2,7 @@
 title: Third Post
 description: Lorem ipsum dolor sit amet consectetur adipisicing elit.
 publish_date: 2022-12-22 11:00
+tags: [a]
 ---
 
 # Third Post

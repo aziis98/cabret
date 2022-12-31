@@ -63,24 +63,22 @@ build:
         to: end
       - use: chunk # paginate items
         size: 10
-        pipeline: # this pipeline gets called with every [size * n, size * n + size] range of items
-          - use: template # aggregate this items chunk in a single item
-            path: layouts/list.html
-          - use: layout
-            path: layouts/base.html
-          - target: dist/posts/{.Chunk.Index}/index.html
+      - use: layout # aggregate this items chunk in a single item
+        path: layouts/list.html
+      - use: layout
+        path: layouts/base.html
+      - target: dist/posts/{.Chunk.Index}/index.html
   # Render "/tags/{tag}/" pages
   - pipeline:
       - source: posts/{id}.md
       - use: frontmatter
       - use: categorize
         key: tags # each post contains a  metadata field called "tags"  
-        pipeline: # this pipeline gets called with all posts relative to one category
-          - use: template
-            path: layouts/tag.html
-          - use: layout
-            path: layouts/base.html
-          - target: dist/tags/{category}/index.html
+      - use: layout
+        path: layouts/tag.html
+      - use: layout
+        path: layouts/base.html
+      - target: dist/tags/{category}/index.html
 ```
 
 ### Pagination

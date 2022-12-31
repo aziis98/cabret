@@ -97,6 +97,7 @@ func (op Layout) ProcessItem(content cabret.Content) (*cabret.Content, error) {
 		return nil, err
 	}
 
+	content.Type = mime.TypeByExtension(filepath.Ext(tmplFiles[0]))
 	content.Data = data
 	return &content, nil
 }

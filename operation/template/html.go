@@ -5,7 +5,13 @@ import (
 	goHtmlTemplate "html/template"
 )
 
-var _ Template = HtmlTemplate{}
+func safeHTML(str string) goHtmlTemplate.HTML {
+	return goHtmlTemplate.HTML(str)
+}
+
+var fn = goHtmlTemplate.FuncMap{
+	"html": safeHTML,
+}
 
 type HtmlTemplate struct {
 	*goHtmlTemplate.Template
@@ -16,6 +22,8 @@ func NewHtmlTemplate(files ...string) (*HtmlTemplate, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	t.Funcs(fn)
 
 	return &HtmlTemplate{t}, nil
 }

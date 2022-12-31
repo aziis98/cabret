@@ -1,9 +1,12 @@
 package operation
 
 import (
+	"bytes"
 	"fmt"
 	"log"
 	"os"
+	"strings"
+	txtTemplate "text/template"
 
 	gopath "path"
 
@@ -34,12 +37,32 @@ func (op *Target) Load(config map[string]any) error {
 }
 
 func (op Target) ProcessItem(c cabret.Content) (*cabret.Content, error) {
-	mr, ok := c.Metadata[cabret.MatchResultKey].(map[string]string)
-	if !ok {
-		return nil, fmt.Errorf(`invalid match result type %T`, c.Metadata[cabret.MatchResultKey])
+	log.Printf(`[operation.Target] expanding pattern "%s"`, op.PathTemplate)
+
+	target := op.PathTemplate
+
+	if strings.Contains(target, "{{") {
+		t, err := txtTemplate.New("path").Parse(target)
+		if err != nil {
+			return nil, err
+		}
+
+		var buf bytes.Buffer
+		if err := t.Execute(&buf, c.Metadata); err != nil {
+			return nil, err
+		}
+
+		target = buf.String()
 	}
 
-	target := path.RenderTemplate(op.PathTemplate, mr)
+	if v, ok := c.Metadata[cabret.MatchResultKey]; ok {
+		context, ok := v.(map[string]string)
+		if !ok {
+			return nil, fmt.Errorf(`invalid match result type %T`, c.Metadata[cabret.MatchResultKey])
+		}
+
+		target = path.RenderTemplate(target, context)
+	}
 
 	log.Printf(`[operation.Target] writing "%s"`, target)
 
