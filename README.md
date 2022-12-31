@@ -67,8 +67,6 @@ Each pipeline is a list of operations, the first field in an operation should be
 
     For each incoming item this will render the given path template with the item metadata and write the content to disk.
 
-
-
 - `use: <operation>`
 
     This will apply the provided operations to the incoming items, for now available operations are
@@ -154,4 +152,22 @@ Each pipeline is a list of operations, the first field in an operation should be
         direction: <ascending or descending>
         key: <key to use for sorting>
         ```
+
+## Architecture
+
+- `cabret.go` &mdash; all abstract types and functions 
+
+- `path/` &mdash; handles path patterns and templates
+
+- `config/` &mdash; contains config structure definitions and handles loading from YAML
+
+- `cmd/cabret` &mdash; module that puts it all together in a CLI application
+
+- `operation/` &mdash; module containing all operations
+
+(_TODO_):
+
+- `exec/ -> runner/` &mdash; a module that depends on `config`, `parse` and `operations` and evaluates operations.
+
+- `pipeline/ -> {parse/, runner/}`
 
