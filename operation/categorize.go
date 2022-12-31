@@ -13,21 +13,41 @@ func init() {
 }
 
 type Categorize struct {
-	Key string
+	Key              string
+	CategoryVariable string
+}
+
+func getKey[T any](m map[string]any, key string, defaultValue ...T) (T, error) {
+	v, ok := m[key]
+	if !ok {
+		if len(defaultValue) > 0 {
+			return defaultValue[0], nil
+		}
+
+		var zero T
+		return zero, fmt.Errorf(`missing "%s" field`, key)
+	}
+
+	value, ok := v.(T)
+	if !ok {
+		var zero T
+		return zero, fmt.Errorf(`expected %T but got "%v" of type %T`, zero, v, v)
+	}
+
+	return value, nil
 }
 
 func (op *Categorize) Load(config map[string]any) error {
-	{
-		v, ok := config["key"]
-		if !ok {
-			return fmt.Errorf(`missing "key" field`)
-		}
-		key, ok := v.(string)
-		if !ok {
-			return fmt.Errorf(`expected string but got "%v" of type %T`, v, v)
-		}
+	var err error
 
-		op.Key = key
+	op.Key, err = getKey[string](config, "key")
+	if err != nil {
+		return err
+	}
+
+	op.CategoryVariable, err = getKey(config, "bind", "Category")
+	if err != nil {
+		return err
 	}
 
 	return nil
@@ -69,8 +89,8 @@ func (op *Categorize) ProcessList(contents []cabret.Content) ([]cabret.Content, 
 		result = append(result, cabret.Content{
 			Type: "metadata-only",
 			Metadata: cabret.Map{
-				"Category": name,
-				"Items":    contents,
+				op.CategoryVariable: name,
+				"Items":             contents,
 			},
 		})
 	}
