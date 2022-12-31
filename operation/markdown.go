@@ -20,7 +20,7 @@ type Markdown struct {
 	Options map[string]any
 }
 
-func (op *Markdown) Load(config map[string]any) error {
+func (op *Markdown) Configure(config map[string]any) error {
 	return nil
 }
 

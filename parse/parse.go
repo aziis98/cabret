@@ -1,4 +1,4 @@
-package pipeline
+package parse
 
 import (
 	"fmt"
@@ -18,7 +18,7 @@ func switchMap(m map[string]any, v *any) func(k string) bool {
 	}
 }
 
-func Parse(p config.Pipeline) ([]cabret.Operation, error) {
+func ParsePipeline(p config.Pipeline) ([]cabret.Operation, error) {
 	ops := []cabret.Operation{}
 
 	for _, opConfig := range p.Pipeline {
@@ -33,8 +33,9 @@ func Parse(p config.Pipeline) ([]cabret.Operation, error) {
 			}
 
 			opConfig[operation.ShortFormValueKey] = value
-			op := &operation.Source{}
-			if err := op.Load(opConfig); err != nil {
+
+			op, err := ParseOperation("source", opConfig)
+			if err != nil {
 				return nil, err
 			}
 
@@ -47,8 +48,9 @@ func Parse(p config.Pipeline) ([]cabret.Operation, error) {
 			}
 
 			opConfig[operation.ShortFormValueKey] = value
-			op := &operation.Target{}
-			if err := op.Load(opConfig); err != nil {
+
+			op, err := ParseOperation("target", opConfig)
+			if err != nil {
 				return nil, err
 			}
 
@@ -60,7 +62,7 @@ func Parse(p config.Pipeline) ([]cabret.Operation, error) {
 				return nil, fmt.Errorf(`expected string but got "%v" of type %T`, v, v)
 			}
 
-			op, err := operation.Build(name, opConfig)
+			op, err := ParseOperation(name, opConfig)
 			if err != nil {
 				return nil, err
 			}
@@ -75,14 +77,15 @@ func Parse(p config.Pipeline) ([]cabret.Operation, error) {
 	return ops, nil
 }
 
-func Process(contents []cabret.Content, ops []cabret.Operation) ([]cabret.Content, error) {
-	for _, op := range ops {
-		var err error
-		contents, err = cabret.ProcessOperation(op, contents)
-		if err != nil {
-			return nil, err
-		}
+func ParseOperation(name string, options map[string]any) (cabret.Operation, error) {
+	op, err := operation.NewWithName(name)
+	if err != nil {
+		return nil, err
 	}
 
-	return contents, nil
+	if err := op.Configure(options); err != nil {
+		return nil, err
+	}
+
+	return op, nil
 }

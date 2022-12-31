@@ -2,6 +2,14 @@
 
 Cabret is a yaml based static site generator, ideally with the same features as Hugo but with a simpler model. Here is a simple example of a _Cabretfile.yaml_
 
+## Build
+
+```bash shell
+$ go build -v -o ./bin/cabret ./cmd/cabret
+```
+
+## Introduction
+
 ```yaml
 build:
   - pipeline:

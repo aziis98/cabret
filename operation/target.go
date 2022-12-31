@@ -22,11 +22,11 @@ type Target struct {
 	PathTemplate string
 }
 
-func (op *Target) Load(config map[string]any) error {
-	if v, ok := config[ShortFormValueKey]; ok {
+func (op *Target) Configure(config map[string]any) error {
+	if v, ok := config["target"]; ok {
 		template, ok := v.(string)
 		if !ok {
-			return fmt.Errorf(`expected pattern but got "%v" of type %T`, v, v)
+			return fmt.Errorf(`expected a path template but got "%v" of type %T`, v, v)
 		}
 
 		op.PathTemplate = template

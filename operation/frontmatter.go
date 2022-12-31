@@ -19,7 +19,7 @@ type Frontmatter struct {
 	Options map[string]any
 }
 
-func (op *Frontmatter) Load(config map[string]any) error {
+func (op *Frontmatter) Configure(config map[string]any) error {
 	return nil
 }
 

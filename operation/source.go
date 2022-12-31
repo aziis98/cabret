@@ -20,20 +20,30 @@ type Source struct {
 	Patterns []string
 }
 
-func (op *Source) Load(config map[string]any) error {
-	if v, ok := config[ShortFormValueKey]; ok {
+func (op *Source) Configure(config map[string]any) error {
+	if v, ok := config["source"]; ok {
 		pattern, ok := v.(string)
 		if !ok {
-			return fmt.Errorf(`expected pattern but got "%v" of type %T`, v, v)
+			return fmt.Errorf(`expected a path pattern but got "%v" of type %T`, v, v)
 		}
 
 		op.Patterns = []string{pattern}
 		return nil
 	}
 	if v, ok := config["paths"]; ok {
-		patterns, ok := v.([]string)
+		aPatterns, ok := v.([]any)
 		if !ok {
-			return fmt.Errorf(`expected list of patterns but got "%v" of type %T`, v, v)
+			return fmt.Errorf(`expected a list of path patterns but got "%v" of type %T`, v, v)
+		}
+
+		patterns := []string{}
+		for _, aPat := range aPatterns {
+			p, ok := aPat.(string)
+			if !ok {
+				return fmt.Errorf(`expected a string but got "%v" of type %T`, aPat, aPat)
+			}
+
+			patterns = append(patterns, p)
 		}
 
 		op.Patterns = patterns

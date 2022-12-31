@@ -37,7 +37,7 @@ func getKey[T any](m map[string]any, key string, defaultValue ...T) (T, error) {
 	return value, nil
 }
 
-func (op *Categorize) Load(config map[string]any) error {
+func (op *Categorize) Configure(config map[string]any) error {
 	var err error
 
 	op.Key, err = getKey[string](config, "key")

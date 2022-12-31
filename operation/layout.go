@@ -24,7 +24,7 @@ type Layout struct {
 	TemplatePatterns []string
 }
 
-func (op *Layout) Load(config map[string]any) error {
+func (op *Layout) Configure(config map[string]any) error {
 	if v, ok := config[ShortFormValueKey]; ok {
 		globPatternsStr, ok := v.(string)
 		if !ok {

@@ -5,8 +5,7 @@
 <ul>
     {{ range .Items }}
     <li>
-        <p>{{ .Metadata.Title }}</p>
-        <pre><code>{{ .Metadata.MatchResult }}</code></pre>
+        <a href="/posts/{{ .Metadata.MatchResult.id }}">{{ .Metadata.Title }}</a>
     </li>
     {{ end }}
 </ul>

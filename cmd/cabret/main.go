@@ -4,7 +4,7 @@ import (
 	"log"
 
 	"github.com/aziis98/cabret/config"
-	"github.com/aziis98/cabret/exec"
+	"github.com/aziis98/cabret/runner"
 )
 
 func main() {
@@ -15,9 +15,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	// repr.Println(cabretfile)
-
-	if err := exec.Execute(cabretfile); err != nil {
+	if err := runner.RunConfig(cabretfile); err != nil {
 		log.Fatal(err)
 	}
 }

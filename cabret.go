@@ -1,7 +1,6 @@
 package cabret
 
 import (
-	"fmt"
 	"log"
 )
 
@@ -35,7 +34,7 @@ type Content struct {
 }
 
 type Operation interface {
-	Load(config map[string]any) error
+	Configure(config map[string]any) error
 }
 
 type ListOperation interface {
@@ -46,29 +45,4 @@ type ListOperation interface {
 type ItemOperation interface {
 	Operation
 	ProcessItem(content Content) (*Content, error)
-}
-
-func ProcessOperation(op Operation, inputs []Content) ([]Content, error) {
-	switch op := op.(type) {
-	case ListOperation:
-		return op.ProcessList(inputs)
-
-	case ItemOperation:
-		outputs := []Content{}
-		for _, item := range inputs {
-			result, err := op.ProcessItem(item)
-			if err != nil {
-				return nil, err
-			}
-
-			// skip terminal operations
-			if result == nil {
-				continue
-			}
-			outputs = append(outputs, *result)
-		}
-		return outputs, nil
-	default:
-		return nil, fmt.Errorf(`invalid operation type %T`, op)
-	}
 }
