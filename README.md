@@ -169,13 +169,11 @@ Each pipeline is a list of operations, the first field in an operation should be
 
 - `config/` &mdash; contains config structure definitions and handles loading from YAML
 
-- `cmd/cabret` &mdash; module that puts it all together in a CLI application
+- `cmd/cabret/` &mdash; module that puts it all together in a CLI application
 
 - `operation/` &mdash; module containing all operations
 
-(_TODO_):
+- `runner/` &mdash; a module that depends on `config`, `parse` and `operations` and evaluates operations.
 
-- `exec/ -> runner/` &mdash; a module that depends on `config`, `parse` and `operations` and evaluates operations.
-
-- `pipeline/ -> {parse/, runner/}`
+- `parse/` &mdash; handles the conversion of pipelines and lists of operations to core types.
 
