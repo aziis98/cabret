@@ -2,7 +2,6 @@ package operation
 
 import (
 	"fmt"
-	"log"
 	"reflect"
 
 	"github.com/aziis98/cabret"
@@ -15,7 +14,6 @@ var registry = map[string]reflect.Type{}
 
 func registerType(name string, op cabret.Operation) {
 	typ := reflect.TypeOf(op).Elem()
-	log.Printf(`[operation] registered type "%v"`, typ)
 	registry[name] = typ
 }
 
