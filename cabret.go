@@ -22,6 +22,9 @@ type File struct {
 	Content
 }
 
+// MetadataOnly is a mime type representing an item that only holds metadata
+const MetadataOnly = "metadata-only"
+
 type Content struct {
 	// Type for known content formats is just the mime-type
 	Type string
@@ -34,15 +37,15 @@ type Content struct {
 }
 
 type Operation interface {
-	Configure(config map[string]any) error
+	Configure(options map[string]any) error
 }
 
 type ListOperation interface {
 	Operation
-	ProcessList(contents []Content) ([]Content, error)
+	ProcessList(items []Content) ([]Content, error)
 }
 
 type ItemOperation interface {
 	Operation
-	ProcessItem(content Content) (*Content, error)
+	ProcessItem(item Content) (*Content, error)
 }
