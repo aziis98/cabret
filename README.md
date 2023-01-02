@@ -148,15 +148,20 @@ Each pipeline is a list of operations, the first field in an operation should be
         ```yaml
         use: chunk
         size: <number>
+        skip_remaining: <true or false> # optional, defaults to "false"
         ```
 
-        This operation will group the incoming items in chunk with the provided size (except for the last one that can end up holding less items). The output items hold no data but have the following structure
+        This operation will group the incoming items in chunk with the provided size (except for the last one that can end up holding less items). 
+        
+        The option `skip_remaining` will exclude the last chunk if it doesn't have exactly "size" items.
+
+        The output items hold no data but have the following structure
 
         ```go
         Metadata: {
-          Page: <Page Number>
-          TotalPages: <Total Page Count>
-          Items: <Chunk>
+            Index: /* 0-indexed current chunk number */,
+            Total: /* total number of chunks */,
+            Items: /* list of items of this chunk */,
         }
         ```
 
