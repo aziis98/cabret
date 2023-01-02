@@ -17,6 +17,10 @@ type Template struct {
 	Engine string
 }
 
+// Configure will configure this operation
+//
+//	use: template
+//	engine: <which engine to use> # required, can be "html" or "text"
 func (op *Template) Configure(options map[string]any) error {
 	var err error
 	op.Engine, err = getKey[string](options, "engine")

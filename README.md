@@ -79,7 +79,22 @@ Each pipeline is a list of operations, the first field in an operation should be
 
     This will apply the provided operations to the incoming items, for now available operations are
 
-    - **Layout** is available in the following forms
+    - **Template** is a list operation that will concatenate all incoming items and render them using the specified template engine
+
+        ```yaml
+        use: template
+        engine: <name>
+        ```
+
+        for now `engine` can be one of
+
+        - `html` &mdash; golang html template engine
+
+        - `text` &mdash; golang text template engine
+
+        - (_TODO_) `handlebars` &mdash; the famous Handlebars template engine 
+
+    - **Layout** is an item operation that works like the previous one as it will use a template engine to render the content of the output item. The main difference is that this will pass the previous item content in the template context in the `.Content` field.
 
         ```yaml
         use: layout
@@ -94,9 +109,11 @@ Each pipeline is a list of operations, the first field in an operation should be
           - <glob pattern N>
         ```
 
-        This operation will load the given pattern with `.ParseFiles(...)` (this automatically chooses between the Go html or text template engines based on the first file name extension)
+        This operation will automatically choose between the go html or text template engines based on the first file name extension, _TODO: make this configurable like the `template` operation_)
 
-        The template context is the incoming item metadata as well its data inside the `.Content` variable.
+        The template context is the incoming item metadata as well its data passed in the `.Content` variable.
+
+        This is useful for wrapping partial html pages into full documents.
 
     - **Markdown** doesn't need any other options (TODO: add some options to configure _goldmark_)
 
@@ -126,7 +143,7 @@ Each pipeline is a list of operations, the first field in an operation should be
 
         By default the output item category is placed into `Category` but this can be changed with the `bind` option.
 
-    - (_TODO_) **Chunk** can be used to paginate some items
+    - **Chunk** can be used to paginate some items
 
         ```yaml
         use: chunk
@@ -143,7 +160,7 @@ Each pipeline is a list of operations, the first field in an operation should be
         }
         ```
 
-    - (_TODO_) **Slice** extract a sub range of items
+    - **Slice** extract a sub range of items
 
         ```yaml
         use: slice
@@ -152,6 +169,22 @@ Each pipeline is a list of operations, the first field in an operation should be
         ```
 
         Does what you expect to the incoming list of items.
+
+    - **Program** is an item operation that will run a specified program passing the current item as stdin. The program output is then processed and becomes the new item data.
+
+        ```yaml
+        use: program
+        io: <stdin/stdout format> # optional, defaults to "raw"
+        command: <shell command>  # required
+        ```
+
+        The io format specifies how the current item is passed to the given program
+
+        - `raw` &mdash; will just pass the item `.Data` raw as stdin to the specified command.
+        
+        - `json` &mdash; will encode the whole item (also including type and metadata) as json ad pass that string as stdin to the specified command.
+
+        _TODO: Make the shell command be a go text/template string, for passing metadata directly thorough the command string._
 
     - (_TODO_) **Sort** sorts the incoming items using the provided key and direction (by default is ascending)
 
@@ -172,6 +205,8 @@ Each pipeline is a list of operations, the first field in an operation should be
 - `cmd/cabret/` &mdash; module that puts it all together in a CLI application
 
 - `operation/` &mdash; module containing all operations
+
+    - `operation/template/` &mdash; a small module that abstract the concept of a template, used by the layout operation.
 
 - `runner/` &mdash; a module that depends on `config`, `parse` and `operations` and evaluates operations.
 
