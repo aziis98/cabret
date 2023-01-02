@@ -1,6 +1,8 @@
 package operation
 
 import (
+	"log"
+
 	"github.com/aziis98/cabret"
 )
 
@@ -42,9 +44,13 @@ func (op *Slice) ProcessList(items []cabret.Content) ([]cabret.Content, error) {
 		to = to + len(items) + 1
 	}
 	if from < 0 {
-		reverse(items)
 		from = from + len(items) + 1
 		from, to = to, from
+		reverse(items)
+
+		log.Printf(`[operation.Slice] slicing and reversing items from %d to %d`, from, to)
+	} else {
+		log.Printf(`[operation.Slice] slicing items from %d to %d`, from, to)
 	}
 
 	return items[from:to], nil

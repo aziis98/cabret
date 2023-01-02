@@ -1,6 +1,10 @@
 package operation
 
-import "github.com/aziis98/cabret"
+import (
+	"log"
+
+	"github.com/aziis98/cabret"
+)
 
 func init() {
 	registerType("chunk", &Chunk{})
@@ -8,13 +12,13 @@ func init() {
 
 // Chunk is a list operation that will group incoming items in groups of the given size
 type Chunk struct {
-	Count         int
+	Size          int
 	SkipRemaining bool
 }
 
 func (op *Chunk) Configure(options map[string]any) error {
 	var err error
-	op.Count, err = getKey[int](options, "size")
+	op.Size, err = getKey[int](options, "size")
 	if err != nil {
 		return err
 	}
@@ -27,16 +31,29 @@ func (op *Chunk) Configure(options map[string]any) error {
 }
 
 func (op *Chunk) ProcessList(items []cabret.Content) ([]cabret.Content, error) {
-	totalPages := len(items) / op.Count
+	totalChunks := len(items) / op.Size
 
-	chunks := make([][]cabret.Content, totalPages, totalPages+1)
+	chunks := make([][]cabret.Content, totalChunks, totalChunks+1)
 
-	for i := 0; i < totalPages; i++ {
-		chunks = append(chunks, items[i*op.Count:(i+1)*op.Count])
+	for i := 0; i < totalChunks; i++ {
+		chunks = append(chunks, items[i*op.Size:(i+1)*op.Size])
 	}
 
 	if !op.SkipRemaining {
-		chunks = append(chunks, items[totalPages*op.Count:])
+		if len(items)%op.Size != 0 {
+			lastExtraChunk := items[totalChunks*op.Size:]
+			chunks = append(chunks, lastExtraChunk)
+
+			if len(lastExtraChunk) != len(items)%op.Size {
+				panic("ehm last chunk and modulus should be equal")
+			}
+
+			log.Printf(`[operation.Chunk] chunked items in %d chunk(s), last with %d items`, totalChunks+1, len(lastExtraChunk))
+		} else {
+			log.Printf(`[operation.Chunk] chunked items in %d chunk(s)`, totalChunks)
+		}
+	} else {
+		log.Printf(`[operation.Chunk] chunked items in %d chunk(s)`, totalChunks)
 	}
 
 	result := make([]cabret.Content, len(chunks))
@@ -44,9 +61,9 @@ func (op *Chunk) ProcessList(items []cabret.Content) ([]cabret.Content, error) {
 		result[i] = cabret.Content{
 			Type: cabret.MetadataOnly,
 			Metadata: cabret.Map{
-				"Page":       i + 1,
-				"TotalPages": totalPages,
-				"Items":      chunk,
+				"Index": i,
+				"Total": totalChunks,
+				"Items": chunk,
 			},
 		}
 	}

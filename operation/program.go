@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"os/exec"
 
 	"github.com/aziis98/cabret"
@@ -116,6 +117,8 @@ func (op *Program) ProcessItem(item cabret.Content) (*cabret.Content, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	log.Printf(`[operation.Program] running external program "%s" with "%s" input`, op.ShellCommand, op.IOFormat)
 
 	cmd := exec.Command("sh", "-c", op.ShellCommand)
 	cmd.Stdin = r

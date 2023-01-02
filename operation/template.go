@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"html/template"
 	"io"
+	"log"
 
 	"github.com/aziis98/cabret"
 )
@@ -40,6 +41,8 @@ func (op *Template) ProcessList(items []cabret.Content) ([]cabret.Content, error
 	}
 
 	tmpl := t.String()
+
+	log.Printf(`[operation.Template] rendering template`)
 
 	var data bytes.Buffer
 	switch op.Engine {
